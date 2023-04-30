@@ -1,0 +1,26 @@
+{
+  "name": "scratch-search-app",
+  "version": "1.0.0",
+  "type":"module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ptlharshil/Scratch-search-app.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ptlharshil/Scratch-search-app/issues"
+  },
+  "homepage": "https://github.com/ptlharshil/Scratch-search-app#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-fetch": "^3.3.1",
+    "nodemon": "^2.0.22"
+  }
+}
