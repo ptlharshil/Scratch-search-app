@@ -16,7 +16,8 @@
             let from=document.getElementById('from')
             let to=document.getElementById('to')
             let errorMsg=document.getElementById('errorMsg')
-            
+            const allResults=document.getElementById('allresults')
+
             
 
             const request=new URLSearchParams({
@@ -29,15 +30,15 @@
             const query=request.toString();
             
             
-                
+                //clearSearch()
                 const response=await fetch('/clinics?'+`${query}`)
                 const data=response.json()
                 data.then(function(clinics){
                   console.log(clinics)
                   clinics.forEach((clinic, index)=>{
                     
-                    
-                    const results=document.createElement('div')//.style.display="block"
+                    const results=document.createElement('div')
+                    results.setAttribute('id', "results")
                     const clinicName=document.createElement('h1')
                     clinicName.textContent=clinic.name===undefined? clinic.clinicName:clinic.name
                     results.appendChild(clinicName)
@@ -58,8 +59,7 @@
                     //   results.style.display="none"
                       
                     // }
-                    
-                    document.body.appendChild(results)
+                    allResults.appendChild(results)
                   })
                   // const LoadResultsButton=document.createElement('button')
                   //     LoadResultsButton.textContent="Load More Results"
@@ -71,7 +71,12 @@
 
         }
 
-      
+      // function clearSearch()
+      // {
+      //   const allResults=document.getElementById('allresults')
+      //   const results=document.getElementById('results')
+      //   allResults.remove(results)
+      // }
     </script>
 </head>
 <body>
@@ -112,10 +117,10 @@
 
       </h1>
       
-      <!-- <div class="card" id="results" style="display: none;">
+      <div class="card" id="allresults">
             
         
-      </div> -->
+      </div>
       <!-- <br>
         <button id="loadButton" onclick="handleResults()" type="button" class="btn btn-outline-primary" style="margin-left:43vw; display: none;">Load More Results</button>
       <br> -->

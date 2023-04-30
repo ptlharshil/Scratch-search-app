@@ -80,8 +80,90 @@ app.get("/clinics", async (req,res)=>{
             res.json(clinicList)
             break;
         case states.includes(req.query.state) && req.query.clinic===''&& req.query.from==='' && req.query.to==='':
-            
+            var stateValue="", stateKey=""
+            for (const [key, value] of Object.entries(statesMap))
+            {
+                if(req.query.state===key)
+                {
+                    stateValue=value
+                    stateKey=key
+                    break
+                }
+                else if(req.query.state===value){
+                    stateValue=value
+                    stateKey=key
+                    break
+                }
+            }
+            const stateWiseClinic=clinicList.filter((clinic)=>{
+                console.log(clinic,clinic.stateName,stateKey)
+                return clinic.stateName ===stateKey
+            }) 
+            const stateWiseClinic1=clinicList.filter((clinic)=>{
+                console.log(clinic.stateCode, stateValue)
+                return clinic.stateCode === stateValue
+            }) 
+            const stateClinic=stateWiseClinic.concat(stateWiseClinic1)
+            res.json(stateClinic)
             break;
+        case req.query.clinic!=='' && req.query.state==='' && req.query.from==='' && req.query.to==='':  
+            const nameWiseClinic=clinicList.filter((clinic)=>{
+                return clinic.name ===req.query.clinic
+            }) 
+            const nameWiseClinic1=clinicList.filter((clinic)=>{
+                return clinic.clinicName === req.query.clinic
+            }) 
+            const nameClinic=nameWiseClinic.concat(nameWiseClinic1)
+            res.json(nameClinic)
+            break
+        case req.query.clinic==='' && req.query.state==='' && req.query.from!=='' && (req.query.to===''||req.query.to!==''):
+            const availClinic=clinicList.filter((clinic)=>{
+                
+                if(clinic.availability)
+                    return clinic.availability.from.substring(0,2)>=req.query.from.substring(0,2)
+                
+            }) 
+            const availClinic1=clinicList.filter((clinic)=>{
+                
+                if(clinic.opening)
+                    return clinic.opening.from.substring(0,2)>=req.query.from.substring(0,2)
+                
+            })
+            const avail=availClinic.concat(availClinic1)
+            res.json(avail)
+            break
+        case req.query.clinic==='' && req.query.state!=='' && req.query.from!=='' && (req.query.to===''||req.query.to!==''):
+            const availStateClinic=clinicList.filter((clinic)=>{
+                
+                if(clinic.availability)
+                    return clinic.availability.from.substring(0,2)>=req.query.from.substring(0,2) && req.query.state===clinic.stateName
+                
+            }) 
+            const availStateClinic1=clinicList.filter((clinic)=>{
+                
+                if(clinic.opening)
+                    return clinic.opening.from.substring(0,2)>=req.query.from.substring(0,2) && req.query.state===clinic.stateCode
+                
+            })
+            const availState=availStateClinic.concat(availStateClinic1)
+            res.json(availState)
+            break
+            case req.query.clinic!=='' && req.query.state!=='' && req.query.from!=='' && (req.query.to===''||req.query.to!==''):
+                const allClinic=clinicList.filter((clinic)=>{
+                
+                    if(clinic.availability)
+                        return clinic.availability.from.substring(0,2)>=req.query.from.substring(0,2) && req.query.state===clinic.stateName && req.query.clinic===clinic.name
+                    
+                }) 
+                const allClinic1=clinicList.filter((clinic)=>{
+                    
+                    if(clinic.opening)
+                        return clinic.opening.from.substring(0,2)>=req.query.from.substring(0,2) && req.query.state===clinic.stateCode && req.query.clinic===clinic.clinicName
+                    
+                })
+                const allState=allClinic.concat(allClinic1)
+                res.json(allState)
+                break
         default:
             break;
     }
