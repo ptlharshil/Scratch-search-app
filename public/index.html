@@ -44,7 +44,7 @@
       data.then(function (clinics) {
         console.log(clinics)
         switch (true) {
-          case clinics === "Please check the details or spelling (case-sensitive) entered":
+          case clinics === "Please check the details or spelling entered":
             error.textContent = clinics
             allResults.style.display = "none"
             error.style.display = "block"
