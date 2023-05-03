@@ -6,7 +6,7 @@ dotenv.config()
 
 async function fetchDentalData() {
     try {
-        const response = await fetch("https://storage.googleapis.com/scratchpay-code-challenge/dental-clinics.json");
+        const response = await fetch(process.env.LIST1);
         const data = await response.json();
         return data;
     } catch (error) {
@@ -18,7 +18,7 @@ const data = await fetchDentalData();
 
 async function fetchVetData() {
     try {
-        const response = await fetch("https://storage.googleapis.com/scratchpay-code-challenge/vet-clinics.json");
+        const response = await fetch(process.env.LIST2);
         const data2 = await response.json();
         return data2;
     } catch (error) {
@@ -161,8 +161,8 @@ function filtering(req, res, states, statesMap) {
         //case 4: INPUT: Only the input field of clinic name is provided | OUTPUT: All the clinics with the particular 
         //clinic name will be displayed
         case req.query.clinic !== '' && req.query.state === '' && req.query.from === '' && req.query.to === '':
-            var error="Please check the details or spelling entered"
-            
+            var error = "Please check the details or spelling entered"
+
             const nameWiseClinic = clinic.filter((clinic) => {
                 if (clinic.availability)
                     return clinic.name.toLowerCase() === req.query.clinic.toLowerCase()
@@ -179,7 +179,7 @@ function filtering(req, res, states, statesMap) {
         // in the particular time frame will be displayed
         case req.query.clinic === '' && req.query.state === '' && req.query.from !== '' && req.query.to !== '':
             //the regex makes sure that only numbers are allowed
-            var error, regex = "^[0-9]*$" 
+            var error, regex = "^[0-9]*$"
             //the conditions in the if loop are for ensuring the correct 24 hour format of time is followed
             //Also, basic checks like the "from" time cannot be past/equal the "to" time
             if (req.query.from > req.query.to || req.query.from === req.query.to || req.query.from.length > 5 || req.query.to.length > 5 ||
@@ -209,7 +209,7 @@ function filtering(req, res, states, statesMap) {
                 res.json(avail)
             }
             break
-        //case 6: INPUT: the user provides the stae and his/her availability | OUTPUT: clinics in the particular 
+        //case 6: INPUT: the user provides the state and his/her availability | OUTPUT: clinics in the particular 
         //sate and with availability as per the users available time frame are returned
         case req.query.clinic === '' && req.query.state !== '' && req.query.from !== '' && req.query.to !== '':
             var error, regex = "^[0-9]*$"
@@ -225,7 +225,7 @@ function filtering(req, res, states, statesMap) {
                 res.json(error)
             }
             else {
-                var stateValue = "", stateKey = "", error="Please check the details or spelling entered"
+                var stateValue = "", stateKey = "", error = "Please check the details or spelling entered"
                 for (const [key, value] of Object.entries(statesMap)) {
                     if (req.query.state.toLowerCase() === key.toLowerCase()) {
                         stateValue = value
@@ -251,7 +251,7 @@ function filtering(req, res, states, statesMap) {
 
                 })
                 const availState = availStateClinic.concat(availStateClinic1)
-                res.json(availState.length===0?error:availState)
+                res.json(availState.length === 0 ? error : availState)
             }
             break
         //case 7: INPUT: All fields except the availability (to) are provided | OUTPUT: clinic within the state 
@@ -285,20 +285,20 @@ function filtering(req, res, states, statesMap) {
                     break
                 }
             }
-            const allClinic = clinic.filter((clinic) => {
+            const noToClinic = clinic.filter((clinic) => {
 
                 if (clinic.availability)
                     return clinic.availability.from.substring(0, 2) <= req.query.from.substring(0, 2) && stateKey.toLowerCase() === clinic.stateName.toLowerCase() && req.query.clinic.toLowerCase() === clinic.name.toLowerCase() && req.query.from < clinic.availability.to
 
             })
-            const allClinic1 = clinic.filter((clinic) => {
+            const noToClinic1 = clinic.filter((clinic) => {
 
                 if (clinic.opening)
                     return clinic.opening.from.substring(0, 2) <= req.query.from.substring(0, 2) && stateValue.toLowerCase() === clinic.stateCode.toLowerCase() && req.query.clinic.toLowerCase() === clinic.clinicName.toLowerCase() && req.query.from < clinic.opening.to
 
             })
-            const allState = allClinic.concat(allClinic1)
-            res.json(allState.length !== 0 ? allState : error)
+            const noTo = noToClinic.concat(noToClinic1)
+            res.json(noTo.length !== 0 ? noTo : error)
             break
         //case 8: INPUT: user enters the clinic name and the state | OUTPUT: clinic with the name and in the particular state  is displayed
         case req.query.clinic !== '' && req.query.state !== '' && req.query.from === '' && (req.query.to === '' || req.query.to !== ''):
@@ -351,7 +351,7 @@ function filtering(req, res, states, statesMap) {
                 res.json(error)
                 break
             }
-            
+
             error = "Please check the details or spelling entered"
             const nameAvailClinic = clinic.filter((clinic) => {
 
@@ -383,19 +383,19 @@ function filtering(req, res, states, statesMap) {
                 res.json(error)
             }
             else {
-                const availClinic = clinic.filter((clinic) => {
+                const fromClinic = clinic.filter((clinic) => {
 
                     if (clinic.availability)
                         return clinic.availability.from.substring(0, 2) <= req.query.from.substring(0, 2) && req.query.from < clinic.availability.to
                 })
-                const availClinic1 = clinic.filter((clinic) => {
+                const fromClinic1 = clinic.filter((clinic) => {
 
                     if (clinic.opening)
                         return clinic.opening.from.substring(0, 2) <= req.query.from.substring(0, 2) && req.query.from < clinic.opening.to
 
                 })
-                const avail = availClinic.concat(availClinic1)
-                res.json(avail)
+                const from = fromClinic.concat(fromClinic1)
+                res.json(from)
             }
             break
 
@@ -419,7 +419,7 @@ function filtering(req, res, states, statesMap) {
                         stateKey = key
                         break
                     }
-            
+
                 }
                 const availStateClinic = clinic.filter((clinic) => {
 
@@ -480,9 +480,9 @@ function filtering(req, res, states, statesMap) {
                     return clinic.opening.from.substring(0, 2) <= req.query.from.substring(0, 2) && stateValue.toLowerCase() === clinic.stateCode.toLowerCase() && req.query.clinic.toLowerCase() === clinic.clinicName.toLowerCase() && req.query.from < clinic.opening.to && clinic.opening.to.substring(0, 2) >= req.query.to.substring(0, 2)
 
             })
-            const aState = aClinic.concat(aClinic1)
+            const all = aClinic.concat(aClinic1)
             error = "Please check the details or spelling entered"
-            res.json(aState.length !== 0 ? aState : error)
+            res.json(all.length !== 0 ? all : error)
             break
 
         //case 13: INPUT: User enters name and availabilty (from) | OUTPUT: particular clinic if available duriong 
@@ -499,21 +499,21 @@ function filtering(req, res, states, statesMap) {
             }
             else {
 
-                const availStateClinic = clinic.filter((clinic) => {
+                const nameFromClinic = clinic.filter((clinic) => {
 
                     if (clinic.availability)
                         return clinic.availability.from.substring(0, 2) <= req.query.from.substring(0, 2) && req.query.clinic.toLowerCase() === clinic.name.toLowerCase() && req.query.from < clinic.availability.to //&& clinic.availability.to.substring(0, 2) > req.query.to.substring(0, 2)
 
                 })
-                const availStateClinic1 = clinic.filter((clinic) => {
+                const nameFromClinic1 = clinic.filter((clinic) => {
 
                     if (clinic.opening)
                         return clinic.opening.from.substring(0, 2) <= req.query.from.substring(0, 2) && req.query.clinic.toLowerCase() === clinic.clinicName.toLowerCase() && req.query.from < clinic.opening.to //&& clinic.opening.to.substring(0, 2) > req.query.to.substring(0, 2)
 
                 })
-                const availState = availStateClinic.concat(availStateClinic1)
+                const nameFrom = nameFromClinic.concat(nameFromClinic1)
                 error = "Please check the details or spelling entered"
-                res.json(availState.length === 0 ? error : availState)
+                res.json(nameFrom.length === 0 ? error : nameFrom)
             }
             break
 
