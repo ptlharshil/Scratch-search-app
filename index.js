@@ -151,16 +151,8 @@ function filtering(req, res, states, statesMap) {
             break;
         //case 4: user inputs only name of the clinic
         case req.query.clinic !== '' && req.query.state === '' && req.query.from === '' && req.query.to === '':
-            var error
-            for (let c of clinic) {
-
-                if (c.availability) {
-                    req.query.clinic.toLowerCase() !== c.name.toLowerCase() && (error = "Please check the details or spelling entered")
-                }
-                else if (c.opening) {
-                    c.opening && req.query.clinic.toLowerCase() !== c.clinicName.toLowerCase() && (error = "Please check the details or spelling entered")
-                }
-            }
+            var error="Please check the details or spelling entered"
+            
             const nameWiseClinic = clinic.filter((clinic) => {
                 if (clinic.availability)
                     return clinic.name.toLowerCase() === req.query.clinic.toLowerCase()
@@ -219,7 +211,7 @@ function filtering(req, res, states, statesMap) {
                 res.json(error)
             }
             else {
-                var stateValue = "", stateKey = ""
+                var stateValue = "", stateKey = "", error="Please check the details or spelling entered"
                 for (const [key, value] of Object.entries(statesMap)) {
                     if (req.query.state.toLowerCase() === key.toLowerCase()) {
                         stateValue = value
@@ -245,7 +237,7 @@ function filtering(req, res, states, statesMap) {
 
                 })
                 const availState = availStateClinic.concat(availStateClinic1)
-                res.json(availState)
+                res.json(availState.length===0?error:availState)
             }
             break
         //case 7: user inputs all details EXCEPT availabilty : to time 
@@ -343,12 +335,8 @@ function filtering(req, res, states, statesMap) {
                 res.json(error)
                 break
             }
-            for (let c of clinic) {
-                if (req.query.clinic.toLowerCase() !== c.name.toLowerCase() || req.query.clinic.toLowerCase() !== c.clinicName.toLowerCase()) {
-                    error = "Please check the details or spelling entered"
-                    break
-                }
-            }
+            
+            error = "Please check the details or spelling entered"
             const nameAvailClinic = clinic.filter((clinic) => {
 
                 if (clinic.availability)
