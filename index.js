@@ -1,7 +1,8 @@
 import express from 'express'
 import fetch from 'node-fetch'
+import * as dotenv from 'dotenv'
 const app = express()
-const port = 3001
+dotenv.config()
 
 async function fetchDentalData() {
     try {
@@ -25,6 +26,9 @@ async function fetchVetData() {
     }
 }
 const data2 = await fetchVetData();
+//clinic is a list of all the clinics. 
+//The APIs are called only once when the application starts and the data is stored in clinic
+//In this way we can avoid multiple API calls and the data is rendered with low latency
 const clinic = data.concat(data2)
 
 app.use(express.static('public'));
@@ -101,13 +105,15 @@ app.get("/clinics", async (req, res) => {
 })
 
 function filtering(req, res, states, statesMap) {
+
     switch (true) {
-        //case 1: no user input provides all entries
+        //case 1: INPUT: All the fields are empty | OUTPUT: list of all clinics
         case req.query.clinic === '' && req.query.state === '' && req.query.from === '' && req.query.to === '':
 
             res.json(clinic)
             break
-        //case 2: if availabilty from time is not provided then show error message
+        //case 2: INPUT: the input field of Availability (from) is empty | OUTPUT: Based on the assumption, error
+        //message will be displayed
         case (req.query.clinic === '' && req.query.state === '' && req.query.from === '' && req.query.to !== '')
             || (req.query.clinic !== '' && req.query.state !== '' && req.query.from === '' && req.query.to !== '')
             || (req.query.clinic !== '' && req.query.state === '' && req.query.from === '' && req.query.to !== '')
@@ -118,9 +124,12 @@ function filtering(req, res, states, statesMap) {
 
 
             break
-        //case 3: user inputs only state
+        //case 3: INPUT: Only the input field of state is provided | OUTPUT: All the clinics in the particular 
+        //state will be displayed
         case req.query.state !== "" && req.query.clinic === '' && req.query.from === '' && req.query.to === '':
-
+            //the below for loop helps in converting CA to California and vice versa in order to fetch all
+            //the clinics in the state depending on the input provided by the user
+            //the data in the APIs have CA in some entries and California in others
             var stateValue = "", stateKey = ""
             for (const [key, value] of Object.entries(statesMap)) {
                 if (req.query.state.toLowerCase() === key.toLowerCase() || req.query.state.toLowerCase() === value.toLowerCase()) {
@@ -149,7 +158,8 @@ function filtering(req, res, states, statesMap) {
             res.json(stateClinic.length === 0 ? error : stateClinic)
 
             break;
-        //case 4: user inputs only name of the clinic
+        //case 4: INPUT: Only the input field of clinic name is provided | OUTPUT: All the clinics with the particular 
+        //clinic name will be displayed
         case req.query.clinic !== '' && req.query.state === '' && req.query.from === '' && req.query.to === '':
             var error="Please check the details or spelling entered"
             
@@ -165,10 +175,13 @@ function filtering(req, res, states, statesMap) {
 
             res.json(nameClinic.length === 0 ? error : nameClinic)
             break
-        //case 5: users inputs availabilty only
+        //case 5: INPUT: Only the input fields of availabilty (from and to) are provided | OUTPUT: All the clinics having availabilty
+        // in the particular time frame will be displayed
         case req.query.clinic === '' && req.query.state === '' && req.query.from !== '' && req.query.to !== '':
-            var error, regex = "^[0-9]*$"
-
+            //the regex makes sure that only numbers are allowed
+            var error, regex = "^[0-9]*$" 
+            //the conditions in the if loop are for ensuring the correct 24 hour format of time is followed
+            //Also, basic checks like the "from" time cannot be past/equal the "to" time
             if (req.query.from > req.query.to || req.query.from === req.query.to || req.query.from.length > 5 || req.query.to.length > 5 ||
                 req.query.from.substring(2, 3) !== ":" ||
                 req.query.from.substring(0, 2) > 23 || req.query.from.substring(0, 2) < 0 || !req.query.from.substring(0, 2).match(regex)
@@ -196,7 +209,8 @@ function filtering(req, res, states, statesMap) {
                 res.json(avail)
             }
             break
-        //case 6: user inputs state and availability
+        //case 6: INPUT: the user provides the stae and his/her availability | OUTPUT: clinics in the particular 
+        //sate and with availability as per the users available time frame are returned
         case req.query.clinic === '' && req.query.state !== '' && req.query.from !== '' && req.query.to !== '':
             var error, regex = "^[0-9]*$"
             if (!states.includes(req.query.state.toLowerCase()) || req.query.from.substring(2, 3) !== ":" || req.query.from.length > 5 || req.query.to.length > 5 ||
@@ -240,7 +254,8 @@ function filtering(req, res, states, statesMap) {
                 res.json(availState.length===0?error:availState)
             }
             break
-        //case 7: user inputs all details EXCEPT availabilty : to time 
+        //case 7: INPUT: All fields except the availability (to) are provided | OUTPUT: clinic within the state 
+        //available during the given time is returned  
         case req.query.clinic !== '' && req.query.state !== '' && req.query.from !== '' && req.query.to === '':
             var error, regex = "^[0-9]*$"
             if (req.query.from.substring(2, 3) !== ":" || req.query.from.length > 5 || req.query.from.length < 5 ||
@@ -285,7 +300,7 @@ function filtering(req, res, states, statesMap) {
             const allState = allClinic.concat(allClinic1)
             res.json(allState.length !== 0 ? allState : error)
             break
-        //case 8: user inputs clinic name and state
+        //case 8: INPUT: user enters the clinic name and the state | OUTPUT: clinic with the name and in the particular state  is displayed
         case req.query.clinic !== '' && req.query.state !== '' && req.query.from === '' && (req.query.to === '' || req.query.to !== ''):
             var error
             for (let c of clinic) {
@@ -321,7 +336,8 @@ function filtering(req, res, states, statesMap) {
             const nameState = nameStateClinic.concat(nameStateClinic1)
             res.json(nameState.length !== 0 ? nameState : error)
             break
-        //case 9: user inputs name of the clinic and availabilty
+        //case 9: INPUT: User enters clinic name and availability | OUTPUT: All the clinics from different states 
+        //with the same name will be displayed as per the availabilty 
         case req.query.clinic !== '' && req.query.state === '' && req.query.from !== '' && req.query.to !== '':
             var error, regex = "^[0-9]*$"
             if (req.query.from.substring(2, 3) !== ":" || req.query.from.length > 5 || req.query.to.length > 5 || req.query.from.length < 5 || req.query.to.length < 5 ||
@@ -352,7 +368,8 @@ function filtering(req, res, states, statesMap) {
             const nameAvail = nameAvailClinic.concat(nameAvailClinic1)
             res.json(nameAvail.length !== 0 ? nameAvail : error)
             break
-        //case 10: user inputs only from
+        //case 10: INPUT: User enters availability (from) | OUTPUT: All the clinics that are available as per the input
+        // will be displayed
         case req.query.clinic === '' && req.query.state === '' && req.query.from !== '' && req.query.to === '':
             var error, regex = "^[0-9]*$"
 
@@ -382,7 +399,8 @@ function filtering(req, res, states, statesMap) {
             }
             break
 
-        //case 11: user inputs state and from
+        //case 11: INPUT: usewr enters state and availabilty (from) | OUTPUT: All the clinics available in the particular
+        //state during the availabilty of the user are displayed
         case req.query.clinic === '' && req.query.state !== '' && req.query.from !== '' && req.query.to === '':
             var error, regex = "^[0-9]*$"
             if (!states.includes(req.query.state.toLowerCase()) || req.query.from.substring(2, 3) !== ":" || req.query.from.length > 5 || req.query.from.length < 5 ||
@@ -420,7 +438,9 @@ function filtering(req, res, states, statesMap) {
                 res.json(availState.length === 0 ? error : availState)
             }
             break
-        //case 12: user inputs all data
+        //case 12: INPUT: user inputs all the information | OUTPUT: particular clinic will be displayed subject to the 
+        //availability of the clinic. if the clinic is unavailable during the user's available time, it will display error 
+        //message
         case req.query.clinic !== '' && req.query.state !== '' && req.query.from !== '' && req.query.to !== '':
             var error, regex = "^[0-9]*$"
             if (req.query.from.substring(2, 3) !== ":" || req.query.from.length > 5 || req.query.from.length < 5 || req.query.to.length > 5 || req.query.to.length < 5 ||
@@ -465,7 +485,8 @@ function filtering(req, res, states, statesMap) {
             res.json(aState.length !== 0 ? aState : error)
             break
 
-        //case 13: user inputs name and from 
+        //case 13: INPUT: User enters name and availabilty (from) | OUTPUT: particular clinic if available duriong 
+        //the user's available time will be displayed else error message will be displayed 
         case req.query.clinic !== '' && req.query.state === '' && req.query.from !== '' && req.query.to === '':
             var error, regex = "^[0-9]*$"
             if (req.query.from.substring(2, 3) !== ":" || req.query.from.length > 5 || req.query.from.length < 5 ||
@@ -501,4 +522,4 @@ function filtering(req, res, states, statesMap) {
     }
 }
 
-app.listen(port, () => console.log("listening on port 3001"))
+app.listen(process.env.PORT, () => console.log("listening"))

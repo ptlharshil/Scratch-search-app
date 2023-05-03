@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ptlharshil/Scratch-search-app#readme",
   "dependencies": {
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "https": "^1.0.0",
     "node-fetch": "^3.3.1",
