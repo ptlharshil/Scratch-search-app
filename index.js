@@ -265,12 +265,6 @@ function filtering(req, res, states, statesMap) {
                 res.json(error)
                 break
             }
-            for (let c of clinic) {
-                if (req.query.clinic.toLowerCase() !== c.name.toLowerCase() || req.query.clinic.toLowerCase() !== c.clinicName.toLowerCase() || !states.includes(req.query.state)) {
-                    error = "Please check the details or spelling entered"
-                    break
-                }
-            }
 
             var stateValue = "", stateKey = ""
             for (const [key, value] of Object.entries(statesMap)) {
@@ -298,16 +292,13 @@ function filtering(req, res, states, statesMap) {
 
             })
             const noTo = noToClinic.concat(noToClinic1)
+            error = "Please check the details or spelling entered"
             res.json(noTo.length !== 0 ? noTo : error)
             break
         //case 8: INPUT: user enters the clinic name and the state | OUTPUT: clinic with the name and in the particular state  is displayed
         case req.query.clinic !== '' && req.query.state !== '' && req.query.from === '' && (req.query.to === '' || req.query.to !== ''):
             var error
-            for (let c of clinic) {
-                if (req.query.clinic !== c.name || req.query.clinic !== c.clinicName || states.includes(req.query.state)) {
-                    error = "Please check the details or spelling entered"
-                }
-            }
+            
             var stateValue = "", stateKey = ""
             for (const [key, value] of Object.entries(statesMap)) {
                 if (req.query.state.toLowerCase() === key.toLowerCase()) {
@@ -334,6 +325,7 @@ function filtering(req, res, states, statesMap) {
 
             })
             const nameState = nameStateClinic.concat(nameStateClinic1)
+            error = "Please check the details or spelling entered"
             res.json(nameState.length !== 0 ? nameState : error)
             break
         //case 9: INPUT: User enters clinic name and availability | OUTPUT: All the clinics from different states 
