@@ -21,7 +21,7 @@ Steps to start the test file
   
 Assumptions:
   Availabilty: from 12:00 to 14:00, here 14:00 is the end of availability time
-  1.	A user cannot enter only the end of availability time (i.e. to) as an input  
+  1.	A user cannot enter only the end of availability time (i.e. to) as an input / if availability (from) input is missing then its not a valid input 
   Example: 
     Clinic Name-
     State-
